@@ -11,7 +11,7 @@ SAVE_PATH = "./tensorboard/cifar-10-v1.0.0/"
 
 # data
 train_images, train_labels = get_train_batch()
-test_images, test_label = get_test_batch()
+test_images, test_labels = get_test_batch()
 
 # variables
 x = tf.placeholder(tf.float32, shape=[None, train_images.shape[1]], name='input')
@@ -56,11 +56,11 @@ def train():
             tacc += round(batch_acc*BATCH_SIZE)
             # progress bar
             if batch_index % 20 == 0:
-                percentage = int(round((((batch_index+BATCH_SIZE+e*len(train_images))/(len(train_images)*EPOCH))*100)))
-                bar_len = 29
+                percentage = float(batch_index+BATCH_SIZE+e*len(train_images))/float(len(train_images)*EPOCH)*100.
+		bar_len = 29
                 filled_len = int((bar_len*int(percentage))/100)
                 bar = '=' * filled_len + '>' + '-' * (bar_len - filled_len)
-                msg = "Epoch: {:}/{:} - Step: {:>5} - [{}] {:>3}% - Bacc: {:.2f} - Tacc: {:.2f} - loss: {:.4f} - {:} sample/sec"
+                msg = "Epoch: {:}/{:} - Step: {:>5} - [{}] {:.2f}% - Bacc: {:.2f} - Tacc: {:.2f} - loss: {:.4f} - {:} sample/sec"
                 print(msg.format((e+1), EPOCH, step, bar, percentage, batch_acc, tacc/(batch_index+BATCH_SIZE+e*len(train_images)), batch_loss, int(BATCH_SIZE/duration)))
 
         summary = tf.Summary(value=[
