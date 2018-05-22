@@ -39,7 +39,7 @@ def network(x, y, phase_train):
                                        padding='SAME'
                                        )
 
-    with tf.variable_scope('conv5') as scope:
+    with tf.variable_scope('conv3') as scope:
         conv = tf.layers.conv2d(
                                 inputs=pool,
                                 filters=128,
@@ -55,8 +55,24 @@ def network(x, y, phase_train):
                                        padding='SAME'
                                        )
 
+    with tf.variable_scope('conv4') as scope:
+        conv = tf.layers.conv2d(
+                                inputs=pool,
+                                filters=256,
+                                kernel_size=[3, 3],
+                                padding='SAME',
+                                activation=tf.nn.relu
+                                )
+        conv_bn = batch_norm(conv, 256, phase_train)
+        pool = tf.layers.max_pooling2d(
+                                       conv, 
+                                       pool_size=[2, 2], 
+                                       strides=2, 
+                                       padding='SAME'
+                                       )
+
     with tf.variable_scope('fc6') as scope:
-        flat = tf.reshape(pool, [-1, 4 * 4 * 128])
+        flat = tf.reshape(pool, [-1, 2 * 2 * 256])
         fc = tf.layers.dense(inputs=flat, units=1500, activation=tf.nn.relu)
         drop = tf.layers.dropout(fc, rate=0.5)
 

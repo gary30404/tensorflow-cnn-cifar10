@@ -21,7 +21,7 @@ global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
 
 # network
 loss, outputs, predict, accuracy = network(x, y, phase_train)
-optimizer = tf.train.AdamOptimizer(learning_rate=0.001,
+optimizer = tf.train.AdamOptimizer(learning_rate=0.0005,
                                    beta1=0.9,
                                    beta2=0.999,
                                    epsilon=1e-08
