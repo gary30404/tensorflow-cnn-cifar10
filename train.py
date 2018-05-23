@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import time
-
+import argparse
 from data import *
 from model import *
 
@@ -9,8 +9,13 @@ IMAGE_SIZE = 32
 IMAGE_CHANNEL = 3
 NUM_CLASSES = 10
 BATCH_SIZE = 128
-EPOCH = 60
-SAVE_PATH = "./tensorboard/cifar-10-v1.0.0/"
+EPOCH = 80
+SAVE_PATH = "./checkpoint/"
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--lr', default=0.01, type=float, help='learning rate')
+parser.add_argument('--chk', type=str, help='checkpoint path')
+args = parser.parse_args()
 
 # data
 train_images, train_labels = get_train_batch()
@@ -24,7 +29,7 @@ global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
 
 # network
 loss, outputs, predict, accuracy = network(x, y, IMAGE_SIZE, IMAGE_CHANNEL, NUM_CLASSES, phase_train)
-optimizer = tf.train.MomentumOptimizer(learning_rate=0.01, momentum=0.9).minimize(loss, global_step=global_step)
+optimizer = tf.train.MomentumOptimizer(learning_rate=args.lr, momentum=0.9).minimize(loss, global_step=global_step)
 
 # saver
 merged = tf.summary.merge_all()
@@ -32,15 +37,15 @@ saver = tf.train.Saver()
 sess = tf.Session()
 train_writer = tf.summary.FileWriter(SAVE_PATH, sess.graph)
 
-try:
-    print("\nTrying to restore last checkpoint ...")
-    last_chk_path = tf.train.latest_checkpoint(checkpoint_dir=SAVE_PATH)
-    saver.restore(sess, save_path=last_chk_path)
-    print("Restored checkpoint from:", last_chk_path)
-except ValueError:
-    print("\nFailed to restore checkpoint. Initializing variables instead.")
+if args.chk is not None:
+    print("Trying to restore from checkpoint ...")
+    try:
+        saver.restore(sess, args.chk)
+    except ValueError:
+        print("Failed to restore checkpoint. Initializing variables instead.")
+        sess.run(tf.global_variables_initializer())
+else:
     sess.run(tf.global_variables_initializer())
-
 
 def train():
     tacc = 0
@@ -76,8 +81,8 @@ def train():
                                     ]
                             )
         train_writer.add_summary(summary, step)
-        saver.save(sess, save_path=SAVE_PATH, global_step=step)
         test()
+    saver.save(sess, SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
 
 
 def test():
@@ -108,3 +113,5 @@ if __name__ == "__main__":
 
 
 sess.close()
+
+
