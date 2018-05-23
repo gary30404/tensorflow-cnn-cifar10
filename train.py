@@ -5,6 +5,9 @@ import time
 from data import *
 from model import *
 
+IMAGE_SIZE = 32
+IMAGE_CHANNEL = 3
+NUM_CLASSES = 10
 BATCH_SIZE = 128
 EPOCH = 60
 SAVE_PATH = "./tensorboard/cifar-10-v1.0.0/"
@@ -20,7 +23,7 @@ phase_train = tf.placeholder(tf.bool, name='phase_train')
 global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
 
 # network
-loss, outputs, predict, accuracy = network(x, y, phase_train)
+loss, outputs, predict, accuracy = network(x, y, IMAGE_SIZE, IMAGE_CHANNEL, NUM_CLASSES, phase_train)
 optimizer = tf.train.AdamOptimizer(learning_rate=0.0005,
                                    beta1=0.9,
                                    beta2=0.999,
