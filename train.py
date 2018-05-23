@@ -24,7 +24,7 @@ global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
 
 # network
 loss, outputs, predict, accuracy = network(x, y, IMAGE_SIZE, IMAGE_CHANNEL, NUM_CLASSES, phase_train)
-optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(loss, global_step=global_step)
+optimizer = tf.train.MomentumOptimizer(learning_rate=0.01, momentum=0.9).minimize(loss, global_step=global_step)
 
 # saver
 merged = tf.summary.merge_all()
