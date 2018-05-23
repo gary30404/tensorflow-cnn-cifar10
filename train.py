@@ -14,7 +14,7 @@ SAVE_PATH = "./checkpoint/"
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--lr', default=0.01, type=float, help='learning rate')
-parser.add_argument('--chk', type=str, help='checkpoint path')
+parser.add_argument('--ckpt', type=str, help='checkpoint path')
 args = parser.parse_args()
 
 # data
@@ -40,7 +40,8 @@ train_writer = tf.summary.FileWriter(SAVE_PATH, sess.graph)
 if args.chk is not None:
     print("Trying to restore from checkpoint ...")
     try:
-        saver.restore(sess, args.chk)
+        last_chk_path = tf.train.latest_checkpoint(checkpoint_dir=args.ckpt)
+        saver.restore(sess, save_path=last_chk_path)
     except ValueError:
         print("Failed to restore checkpoint. Initializing variables instead.")
         sess.run(tf.global_variables_initializer())
