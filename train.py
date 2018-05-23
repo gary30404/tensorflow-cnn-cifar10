@@ -37,7 +37,7 @@ saver = tf.train.Saver()
 sess = tf.Session()
 train_writer = tf.summary.FileWriter(SAVE_PATH, sess.graph)
 
-if args.chk is not None:
+if args.ckpt is not None:
     print("Trying to restore from checkpoint ...")
     try:
         last_chk_path = tf.train.latest_checkpoint(checkpoint_dir=args.ckpt)
