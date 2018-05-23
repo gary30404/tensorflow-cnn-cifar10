@@ -57,7 +57,10 @@ class VGG:
         with tf.variable_scope('bn'):
             beta = tf.Variable(tf.constant(0.0, shape=[n_out]), name='beta', trainable=True)
             gamma = tf.Variable(tf.constant(1.0, shape=[n_out]), name='gamma', trainable=True)
-            batch_mean, batch_var = tf.nn.moments(x, [0,1,2], name='moments')
+            if len(x.shape) == 4:
+                batch_mean, batch_var = tf.nn.moments(x, [0,1,2], name='moments')
+            else:
+                batch_mean, batch_var = tf.nn.moments(x, [0,1], name='moments')
             ema = tf.train.ExponentialMovingAverage(decay=0.5)
 
             def mean_var_with_update():
