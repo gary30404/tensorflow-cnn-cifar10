@@ -11,13 +11,13 @@ def network(x, y, phase_train):
         conv = tf.layers.conv2d(
                                 inputs=x_image,
                                 filters=32,
-                                kernel_size=[3, 3],
+                                kernel_size=[5, 5],
                                 padding='SAME',
                                 activation=tf.nn.relu
                                 )
         conv_bn = batch_norm(conv, 32, phase_train)
         pool = tf.layers.max_pooling2d(
-                                       conv, 
+                                       conv_bn, 
                                        pool_size=[2, 2], 
                                        strides=2, 
                                        padding='SAME'
@@ -27,13 +27,13 @@ def network(x, y, phase_train):
         conv = tf.layers.conv2d(
                                 inputs=pool,
                                 filters=64,
-                                kernel_size=[3, 3],
+                                kernel_size=[5, 5],
                                 padding='SAME',
                                 activation=tf.nn.relu
                                 )
         conv_bn = batch_norm(conv, 64, phase_train)
         pool = tf.layers.max_pooling2d(
-                                       conv, 
+                                       conv_bn, 
                                        pool_size=[2, 2], 
                                        strides=2, 
                                        padding='SAME'
@@ -47,7 +47,6 @@ def network(x, y, phase_train):
                                 padding='SAME',
                                 activation=tf.nn.relu
                                 )
-        conv_bn = batch_norm(conv, 128, phase_train)
         pool = tf.layers.max_pooling2d(
                                        conv, 
                                        pool_size=[2, 2], 
@@ -63,7 +62,6 @@ def network(x, y, phase_train):
                                 padding='SAME',
                                 activation=tf.nn.relu
                                 )
-        conv_bn = batch_norm(conv, 256, phase_train)
         pool = tf.layers.max_pooling2d(
                                        conv, 
                                        pool_size=[2, 2], 
@@ -72,12 +70,12 @@ def network(x, y, phase_train):
                                        )
 
     with tf.variable_scope('fc6') as scope:
-        flat = tf.reshape(pool, [-1, 2 * 2 * 256])
-        fc = tf.layers.dense(inputs=flat, units=1500, activation=tf.nn.relu)
+        flat = tf.reshape(pool, [-1, pool.shape[1] * pool.shape[2] * pool.shape[3]])
+        fc = tf.layers.dense(inputs=flat, units=512, activation=tf.nn.relu)
         drop = tf.layers.dropout(fc, rate=0.5)
 
     with tf.variable_scope('fc7') as scope:
-        fc = tf.layers.dense(inputs=drop, units=100, activation=tf.nn.relu)
+        fc = tf.layers.dense(inputs=drop, units=512, activation=tf.nn.relu)
         outputs = tf.layers.dense(inputs=fc, units=NUM_CLASSES, activation=tf.nn.softmax, name=scope.name)
 
 
