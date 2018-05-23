@@ -59,7 +59,7 @@ def train():
                 percentage = float(batch_index+BATCH_SIZE+e*len(train_images))/float(len(train_images)*EPOCH)*100.
 		bar_len = 29
                 filled_len = int((bar_len*int(percentage))/100)
-                bar = '=' * filled_len + '>' + '-' * (bar_len - filled_len)
+                bar = '=' * filled_len + '>' + '*' * (bar_len - filled_len)
                 msg = "Epoch: {:}/{:} - Step: {:>5} - [{}] {:.2f}% - Bacc: {:.2f} - Tacc: {:.2f} - loss: {:.4f} - {:} sample/sec"
                 print(msg.format((e+1), EPOCH, step, bar, percentage, batch_acc, tacc/(batch_index+BATCH_SIZE+e*len(train_images)), batch_loss, int(BATCH_SIZE/duration)))
 
