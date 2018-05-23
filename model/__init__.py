@@ -3,7 +3,7 @@ from vgg import VGG
 
 def network(x, y, image_size, image_channels, num_classes, phase_train):
 
-    net = VGG(x, image_size, image_channels, num_classes, phase_train, 'VGG11')
+    net = VGG(x, image_size, image_channels, num_classes, phase_train, 'VGG16')
     outputs = net.build_network()
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=outputs, labels=y))
     predict = tf.argmax(outputs, axis=1)
