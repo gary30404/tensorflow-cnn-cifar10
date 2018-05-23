@@ -24,11 +24,7 @@ global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
 
 # network
 loss, outputs, predict, accuracy = network(x, y, IMAGE_SIZE, IMAGE_CHANNEL, NUM_CLASSES, phase_train)
-optimizer = tf.train.AdamOptimizer(learning_rate=0.0005,
-                                   beta1=0.9,
-                                   beta2=0.999,
-                                   epsilon=1e-08
-                                   ).minimize(loss, global_step=global_step)
+optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(loss, global_step=global_step)
 
 # saver
 merged = tf.summary.merge_all()
@@ -36,7 +32,14 @@ saver = tf.train.Saver()
 sess = tf.Session()
 train_writer = tf.summary.FileWriter(SAVE_PATH, sess.graph)
 
-sess.run(tf.global_variables_initializer())
+try:
+    print("\nTrying to restore last checkpoint ...")
+    last_chk_path = tf.train.latest_checkpoint(checkpoint_dir=_SAVE_PATH)
+    saver.restore(sess, save_path=last_chk_path)
+    print("Restored checkpoint from:", last_chk_path)
+except ValueError:
+    print("\nFailed to restore checkpoint. Initializing variables instead.")
+    sess.run(tf.global_variables_initializer())
 
 
 def train():
