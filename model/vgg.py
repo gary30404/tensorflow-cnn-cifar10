@@ -37,13 +37,20 @@ class VGG:
                 out = self.batch_norm(out, num_filters, self.phase_train)
                 out = tf.nn.relu(out)
             inputs = out
+        # flatten
         flat = tf.reshape(out, [-1, int(out.shape[1]*out.shape[2]*out.shape[3])])
-        fc1 = tf.layers.dense(inputs=flat, units=4096, activation=tf.nn.relu)
-        drop = tf.layers.dropout(fc1, rate=0.5)
-        fc2 = tf.layers.dense(inputs=drop, units=4096, activation=tf.nn.relu)
+        # fc1
+        fc1 = tf.layers.dense(inputs=flat, units=512, activation=None)
+        bn = self.batch_norm(fc1, 512, self.phase_train)
+        relu = tf.nn.relu(bn)
+        drop = tf.layers.dropout(relu, rate=0.5)
+        #fc2
+        fc2 = tf.layers.dense(inputs=drop, units=512, activation=None)
+        bn = self.batch_norm(fc2, 512, self.phase_train)
+        relu = tf.nn.relu(bn)
         drop = tf.layers.dropout(fc2, rate=0.5)
-        fc3 = tf.layers.dense(inputs=fc2, units=self.num_classes, activation=tf.nn.relu)
-        outputs = tf.layers.dense(inputs=fc3, units=self.num_classes, activation=tf.nn.softmax)
+        #softmax
+        outputs = tf.layers.dense(inputs=drop, units=self.num_classes, activation=tf.nn.softmax)
         return outputs
 
     def batch_norm(self, x, n_out, phase_train):

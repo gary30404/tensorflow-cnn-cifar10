@@ -29,7 +29,11 @@ global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
 
 # network
 loss, outputs, predict, accuracy = network(x, y, IMAGE_SIZE, IMAGE_CHANNEL, NUM_CLASSES, phase_train)
-optimizer = tf.train.MomentumOptimizer(learning_rate=args.lr, momentum=0.9).minimize(loss, global_step=global_step)
+#optimizer = tf.train.MomentumOptimizer(learning_rate=args.lr, momentum=0.9).minimize(loss, global_step=global_step)
+optimizer = tf.train.AdamOptimizer(learning_rate=args.lr,
+                                   beta1=0.9,
+                                   beta2=0.999,
+                                   epsilon=1e-08).minimize(loss, global_step=global_step)
 
 # saver
 merged = tf.summary.merge_all()
