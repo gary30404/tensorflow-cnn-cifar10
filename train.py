@@ -9,7 +9,7 @@ IMAGE_SIZE = 32
 IMAGE_CHANNEL = 3
 NUM_CLASSES = 10
 BATCH_SIZE = 128
-EPOCH = 80
+EPOCH = 100
 SAVE_PATH = "./checkpoint/"
 
 parser = argparse.ArgumentParser()
@@ -29,11 +29,7 @@ global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
 
 # network
 loss, outputs, predict, accuracy = network(x, y, IMAGE_SIZE, IMAGE_CHANNEL, NUM_CLASSES, phase_train)
-#optimizer = tf.train.MomentumOptimizer(learning_rate=args.lr, momentum=0.9).minimize(loss, global_step=global_step)
-optimizer = tf.train.AdamOptimizer(learning_rate=args.lr,
-                                   beta1=0.9,
-                                   beta2=0.999,
-                                   epsilon=1e-08).minimize(loss, global_step=global_step)
+optimizer = tf.train.MomentumOptimizer(learning_rate=args.lr, momentum=0.9).minimize(loss, global_step=global_step)
 
 # saver
 merged = tf.summary.merge_all()
@@ -54,6 +50,7 @@ else:
 
 def train():
     tacc = 0
+    global_test_acc = 0
     for e in range(EPOCH):
         for batch_index in range(0, len(train_images), BATCH_SIZE):
             if batch_index + BATCH_SIZE < len(train_images):
@@ -73,7 +70,7 @@ def train():
             # progress bar
             if batch_index % 20 == 0:
                 percentage = float(batch_index+BATCH_SIZE+e*len(train_images))/float(len(train_images)*EPOCH)*100.
-		bar_len = 29
+                bar_len = 29
                 filled_len = int((bar_len*int(percentage))/100)
                 bar = '*' * filled_len + '>' + '-' * (bar_len - filled_len)
                 msg = "Epoch: {:}/{:} - Step: {:>5} - [{}] {:.2f}% - Bacc: {:.2f} - Tacc: {:.2f} - loss: {:.4f} - {:} sample/sec"
@@ -86,12 +83,14 @@ def train():
                                     ]
                             )
         train_writer.add_summary(summary, step)
-        test()
+        acc = test()
+        if acc > global_test_acc:
+            saver.save(sess, SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'_acc:'+str(acc)+'.ckpt')
+            global_test_acc = acc
     saver.save(sess, SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
 
 
 def test():
-
     predicted_matrix = np.zeros(shape=len(test_images), dtype=np.int)
     for batch_index in range(0, len(test_images), BATCH_SIZE):
         if batch_index + BATCH_SIZE < len(test_images):
@@ -107,7 +106,7 @@ def test():
     correct_numbers = correct.sum()
     mes = "\nAccuracy: {:.2f}% ({}/{})"
     print(mes.format(acc, correct_numbers, len(test_labels)))
-
+    return acc
 
 def main():
     train()

@@ -24,6 +24,8 @@ def get_data(file):
     X /= 255.0
     X = X.reshape([-1, 3, 32, 32])
     X = X.transpose([0, 2, 3, 1])
+    X -= (0.4914, 0.4822, 0.4465)
+    X /= (0.2023, 0.1994, 0.2010)
     X = X.reshape(-1, 32*32*3)
 
     return X,Y
