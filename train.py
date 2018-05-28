@@ -85,8 +85,10 @@ def train():
         train_writer.add_summary(summary, step)
         acc = test()
         if acc > global_test_acc:
-            saver.save(sess, SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'_acc:'+str(acc)+'.ckpt')
+            saver.save(sess, SAVE_PATH+str(e)+'_'+str(args.lr)+'_acc:'+str(acc)+'.ckpt')
             global_test_acc = acc
+            print("\nReach a better testing accuracy at epoch: {:} with {:.2f}%".format(e, acc))
+            print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
     saver.save(sess, SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
 
 
