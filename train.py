@@ -89,7 +89,7 @@ def train():
             global_test_acc = acc
             print("\nReach a better testing accuracy at epoch: {:} with {:.2f}%".format(e, acc))
             print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
-    saver.save(sess, SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
+    #saver.save(sess, SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
 
 
 def test():
