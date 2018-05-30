@@ -86,7 +86,7 @@ def train():
                 bar_len = 29
                 filled_len = int((bar_len*int(percentage))/100)
                 bar = '=' * filled_len + '>' + '-' * (bar_len - filled_len)
-                msg = "Epoch: {:}/{:} - Step: {:>5} - [{}] {:.2f}% - Batch Acc: {:.2f} - loss: {:.4f} - {:} sample/sec"
+                msg = "Epoch: {:}/{:} - Step: {:>5} - [{}] {:.2f}% - Batch Acc: {:.2f} - Loss: {:.4f} - {:} Sample/sec"
                 print(msg.format((e+1), EPOCH, step, bar, percentage, batch_acc, batch_loss, int(BATCH_SIZE/duration)))
 
         summary = tf.Summary(value=[
@@ -104,23 +104,23 @@ def train():
             print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
     train_writer.close()
 
-def test():
-    predicted_matrix = np.zeros(shape=len(test_images), dtype=np.int)
-    for batch_index in range(0, len(test_images), BATCH_SIZE):
-        if batch_index + BATCH_SIZE < len(test_images):
-            data = test_images[batch_index:batch_index+BATCH_SIZE]
-            label = test_labels[batch_index:batch_index + BATCH_SIZE]
-            predicted_matrix[batch_index:batch_index+BATCH_SIZE] = sess.run(predict, feed_dict={x: data, y: label, phase_train: False})
-        else:
-            data = test_images[batch_index:len(test_images)]
-            label = test_labels[batch_index:len(test_labels)]
-            predicted_matrix[batch_index:len(test_labels)] = sess.run(predict, feed_dict={x: data, y: label, phase_train: False})
-    correct = (np.argmax(test_labels, axis=1) == predicted_matrix)
-    acc = correct.mean()*100
-    correct_numbers = correct.sum()
-    mes = "\nAccuracy: {:.2f}% ({}/{})"
-    print(mes.format(acc, correct_numbers, len(test_labels)))
-    return acc
+    def test():
+        predicted_matrix = np.zeros(shape=len(test_images), dtype=np.int)
+        for batch_index in range(0, len(test_images), BATCH_SIZE):
+            if batch_index + BATCH_SIZE < len(test_images):
+                data = test_images[batch_index:batch_index+BATCH_SIZE]
+                label = test_labels[batch_index:batch_index + BATCH_SIZE]
+                predicted_matrix[batch_index:batch_index+BATCH_SIZE] = sess.run(predict, feed_dict={x: data, y: label, phase_train: False})
+            else:
+                data = test_images[batch_index:len(test_images)]
+                label = test_labels[batch_index:len(test_labels)]
+                predicted_matrix[batch_index:len(test_labels)] = sess.run(predict, feed_dict={x: data, y: label, phase_train: False})
+        correct = (np.argmax(test_labels, axis=1) == predicted_matrix)
+        acc = correct.mean()*100
+        correct_numbers = correct.sum()
+        mes = "\nAccuracy: {:.2f}% ({}/{})"
+        print(mes.format(acc, correct_numbers, len(test_labels)))
+        return acc
 
 def main():
     train()
