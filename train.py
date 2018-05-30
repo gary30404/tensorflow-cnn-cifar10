@@ -13,11 +13,11 @@ BATCH_SIZE = 1
 EPOCH = 100
 SAVE_PATH = "./checkpoint/"
 
-
-def train():
-    # data
+# data
     train_images, train_labels = get_train_batch()
     test_images, test_labels = get_test_batch()
+
+def train():
 
     # model
     sess = tf.InteractiveSession()
