@@ -13,11 +13,13 @@ BATCH_SIZE = 128
 EPOCH = 100
 SAVE_PATH = "./checkpoint/"
 
-# data
-train_images, train_labels = get_train_batch()
-test_images, test_labels = get_test_batch()
+
 
 def train():
+
+    # data
+    train_images, train_labels = get_train_batch()
+    test_images, test_labels = get_test_batch()
 
     # model
     sess = tf.InteractiveSession()
@@ -96,15 +98,8 @@ def train():
                                     ]
                             )
         train_writer.add_summary(summary, step)
-        acc = test()
-        if acc > global_test_acc:
-            saver.save(sess, SAVE_PATH+str(e)+'_'+str(args.lr)+'_acc:'+str(acc)+'.ckpt')
-            global_test_acc = acc
-            print("\nReach a better testing accuracy at epoch: {:} with {:.2f}%".format(e, acc))
-            print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
-    train_writer.close()
 
-    def test():
+        # test section
         predicted_matrix = np.zeros(shape=len(test_images), dtype=np.int)
         for batch_index in range(0, len(test_images), BATCH_SIZE):
             if batch_index + BATCH_SIZE < len(test_images):
@@ -120,7 +115,13 @@ def train():
         correct_numbers = correct.sum()
         mes = "\nAccuracy: {:.2f}% ({}/{})"
         print(mes.format(acc, correct_numbers, len(test_labels)))
-        return acc
+        
+        if acc > global_test_acc:
+            saver.save(sess, SAVE_PATH+str(e)+'_'+str(args.lr)+'_acc:'+str(acc)+'.ckpt')
+            global_test_acc = acc
+            print("\nReach a better testing accuracy at epoch: {:} with {:.2f}%".format(e, acc))
+            print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
+    train_writer.close()
 
 def main():
     train()
