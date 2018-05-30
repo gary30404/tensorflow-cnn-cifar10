@@ -9,13 +9,13 @@ from  model.googlenet import GoogLeNet
 IMAGE_SIZE = 32
 IMAGE_CHANNEL = 3
 NUM_CLASSES = 10
-BATCH_SIZE = 1
+BATCH_SIZE = 128
 EPOCH = 100
 SAVE_PATH = "./checkpoint/"
 
 # data
-    train_images, train_labels = get_train_batch()
-    test_images, test_labels = get_test_batch()
+train_images, train_labels = get_train_batch()
+test_images, test_labels = get_test_batch()
 
 def train():
 
