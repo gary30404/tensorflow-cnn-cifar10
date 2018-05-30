@@ -3,53 +3,67 @@ import tensorflow as tf
 import time
 import argparse
 from data import *
-from model import *
+from model.vgg import VGG
+from  model.googlenet import GoogLeNet
 
 IMAGE_SIZE = 32
 IMAGE_CHANNEL = 3
 NUM_CLASSES = 10
-BATCH_SIZE = 128
+BATCH_SIZE = 1
 EPOCH = 100
 SAVE_PATH = "./checkpoint/"
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--lr', default=0.01, type=float, help='learning rate')
-parser.add_argument('--ckpt', type=str, help='checkpoint path')
-args = parser.parse_args()
-
-# data
-train_images, train_labels = get_train_batch()
-test_images, test_labels = get_test_batch()
-
-# variables
-x = tf.placeholder(tf.float32, shape=[None, train_images.shape[1]], name='input')
-y = tf.placeholder(tf.float32, shape=[None, train_labels.shape[1]], name='output')
-phase_train = tf.placeholder(tf.bool, name='phase_train')
-global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
-
-# network
-loss, outputs, predict, accuracy = network(x, y, IMAGE_SIZE, IMAGE_CHANNEL, NUM_CLASSES, phase_train)
-optimizer = tf.train.MomentumOptimizer(learning_rate=args.lr, momentum=0.9).minimize(loss, global_step=global_step)
-
-# saver
-merged = tf.summary.merge_all()
-saver = tf.train.Saver()
-sess = tf.Session()
-train_writer = tf.summary.FileWriter(SAVE_PATH, sess.graph)
-
-if args.ckpt is not None:
-    print("Trying to restore from checkpoint ...")
-    try:
-        last_chk_path = tf.train.latest_checkpoint(checkpoint_dir=args.ckpt)
-        saver.restore(sess, save_path=last_chk_path)
-    except ValueError:
-        print("Failed to restore checkpoint. Initializing variables instead.")
-        sess.run(tf.global_variables_initializer())
-else:
-    sess.run(tf.global_variables_initializer())
 
 def train():
-    tacc = 0
+    # data
+    train_images, train_labels = get_train_batch()
+    test_images, test_labels = get_test_batch()
+
+    # model
+    sess = tf.InteractiveSession()
+
+    # variables
+    phase_train = tf.placeholder(tf.bool, name='phase_train')
+    global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
+    with tf.name_scope('input'):
+        x = tf.placeholder(tf.float32, shape=[None, train_images.shape[1]], name='x_input')
+        y = tf.placeholder(tf.float32, shape=[None, train_labels.shape[1]], name='y_input')
+
+    # network
+    with tf.name_scope('network'):
+        outputs = GoogLeNet(x, IMAGE_SIZE, IMAGE_CHANNEL, NUM_CLASSES, phase_train, '')
+
+    with tf.name_scope('loss'):
+        loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=outputs, labels=y))
+    tf.summary.scalar('loss', loss)
+
+    with tf.name_scope('accuracy'):
+        predict = tf.argmax(outputs, axis=1)
+        acc = tf.equal(predict, tf.argmax(y, axis=1))
+        accuracy = tf.reduce_mean(tf.cast(acc, tf.float32))
+    tf.summary.scalar('accuracy', accuracy)
+
+    with tf.name_scope('train'):
+        #optimizer = tf.train.MomentumOptimizer(learning_rate=args.lr, momentum=0.9).minimize(loss, global_step=global_step)
+        optimizer = tf.train.AdamOptimizer(learning_rate=args.lr).minimize(loss, global_step=global_step)
+
+    # saver
+    merged = tf.summary.merge_all()
+    saver = tf.train.Saver()
+    train_writer = tf.summary.FileWriter(SAVE_PATH, sess.graph)
+
+    if args.ckpt is not None:
+        print("Trying to restore from checkpoint ...")
+        try:
+            last_chk_path = tf.train.latest_checkpoint(checkpoint_dir=args.ckpt)
+            saver.restore(sess, save_path=last_chk_path)
+        except ValueError:
+            print("Failed to restore checkpoint. Initializing variables instead.")
+            sess.run(tf.global_variables_initializer())
+    else:
+        sess.run(tf.global_variables_initializer())
+
+
     global_test_acc = 0
     for e in range(EPOCH):
         for batch_index in range(0, len(train_images), BATCH_SIZE):
@@ -66,20 +80,19 @@ def train():
                                                       )
             end_time = time.time()
             duration = end_time - start_time
-            tacc += round(batch_acc*BATCH_SIZE)
             # progress bar
             if batch_index % 20 == 0:
                 percentage = float(batch_index+BATCH_SIZE+e*len(train_images))/float(len(train_images)*EPOCH)*100.
                 bar_len = 29
                 filled_len = int((bar_len*int(percentage))/100)
-                bar = '*' * filled_len + '>' + '-' * (bar_len - filled_len)
-                msg = "Epoch: {:}/{:} - Step: {:>5} - [{}] {:.2f}% - Bacc: {:.2f} - Tacc: {:.2f} - loss: {:.4f} - {:} sample/sec"
-                print(msg.format((e+1), EPOCH, step, bar, percentage, batch_acc, tacc/(batch_index+BATCH_SIZE+e*len(train_images)), batch_loss, int(BATCH_SIZE/duration)))
+                bar = '=' * filled_len + '>' + '-' * (bar_len - filled_len)
+                msg = "Epoch: {:}/{:} - Step: {:>5} - [{}] {:.2f}% - Batch Acc: {:.2f} - loss: {:.4f} - {:} sample/sec"
+                print(msg.format((e+1), EPOCH, step, bar, percentage, batch_acc, batch_loss, int(BATCH_SIZE/duration)))
 
         summary = tf.Summary(value=[
                                     tf.Summary.Value(tag='Epoch', simple_value=e),
                                     tf.Summary.Value(tag='Loss', simple_value=batch_loss),
-                                    tf.Summary.Value(tag='Tacc', simple_value=tacc/(batch_index+BATCH_SIZE+e*len(train_images))),
+                                    tf.Summary.Value(tag='Acc', simple_value=batch_acc),
                                     ]
                             )
         train_writer.add_summary(summary, step)
@@ -89,8 +102,7 @@ def train():
             global_test_acc = acc
             print("\nReach a better testing accuracy at epoch: {:} with {:.2f}%".format(e, acc))
             print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
-    #saver.save(sess, SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
-
+    train_writer.close()
 
 def test():
     predicted_matrix = np.zeros(shape=len(test_images), dtype=np.int)
@@ -115,6 +127,10 @@ def main():
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--lr', default=0.01, type=float, help='learning rate')
+    parser.add_argument('--ckpt', type=str, help='checkpoint path')
+    args = parser.parse_args()
     main()
 
 
