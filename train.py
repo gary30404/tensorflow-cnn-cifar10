@@ -106,30 +106,30 @@ def train():
                             )
         train_writer.add_summary(summary, step)
 
-            # validation
-            '''
-            predicted_matrix = np.zeros(shape=len(val_x), dtype=np.int)
-            for batch_index in range(0, len(val_x), BATCH_SIZE):
-                if batch_index + BATCH_SIZE < len(val_x):
-                    data = val_x[batch_index:batch_index+BATCH_SIZE]
-                    label = val_y[batch_index:batch_index + BATCH_SIZE]
-                    predicted_matrix[batch_index:batch_index+BATCH_SIZE] = sess.run(predict, feed_dict={x: data, y: label, phase_train: False})
-                else:
-                    data = val_x[batch_index:len(val_x)]
-                    label = val_y[batch_index:len(val_y)]
-                    predicted_matrix[batch_index:len(val_y)] = sess.run(predict, feed_dict={x: data, y: label, phase_train: False})
-            correct = (np.argmax(val_y, axis=1) == predicted_matrix)
-            acc = correct.mean()*100
-            correct_numbers = correct.sum()
-            mes = "\nValidation Accuracy: {:.2f}% ({}/{})\n"
-            print(mes.format(acc, correct_numbers, len(val_y)))
-            
-            if acc > global_val_acc:
-                saver.save(sess, SAVE_PATH+str(e)+'_'+str(args.lr)+'_acc:'+str(acc)+'.ckpt')
-                global_test_acc = acc
-                print("\nReach a better validation accuracy at epoch: {:} with {:.2f}%".format(e, acc))
-                print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt\n')
-            '''
+        # validation
+        '''
+        predicted_matrix = np.zeros(shape=len(val_x), dtype=np.int)
+        for batch_index in range(0, len(val_x), BATCH_SIZE):
+            if batch_index + BATCH_SIZE < len(val_x):
+                data = val_x[batch_index:batch_index+BATCH_SIZE]
+                label = val_y[batch_index:batch_index + BATCH_SIZE]
+                predicted_matrix[batch_index:batch_index+BATCH_SIZE] = sess.run(predict, feed_dict={x: data, y: label, phase_train: False})
+            else:
+                data = val_x[batch_index:len(val_x)]
+                label = val_y[batch_index:len(val_y)]
+                predicted_matrix[batch_index:len(val_y)] = sess.run(predict, feed_dict={x: data, y: label, phase_train: False})
+        correct = (np.argmax(val_y, axis=1) == predicted_matrix)
+        acc = correct.mean()*100
+        correct_numbers = correct.sum()
+        mes = "\nValidation Accuracy: {:.2f}% ({}/{})\n"
+        print(mes.format(acc, correct_numbers, len(val_y)))
+        
+        if acc > global_val_acc:
+            saver.save(sess, SAVE_PATH+str(e)+'_'+str(args.lr)+'_acc:'+str(acc)+'.ckpt')
+            global_test_acc = acc
+            print("\nReach a better validation accuracy at epoch: {:} with {:.2f}%".format(e, acc))
+            print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt\n')
+        '''
     train_writer.close()
 
     # test section
