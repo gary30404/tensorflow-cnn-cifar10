@@ -14,19 +14,19 @@ def VGG(x, image_size, image_channels, num_classes, phase_train, net):
     for num_filters in n:
         if num_filters == 'p':
             out = tf.layers.max_pooling2d(
-                                   inputs, 
-                                   pool_size=[2, 2], 
-                                   strides=2, 
-                                   padding='SAME'
-                                   )
+                                          inputs, 
+                                          pool_size=[2, 2], 
+                                          strides=2, 
+                                          padding='SAME'
+                                          )
         else:
             out = tf.layers.conv2d(
-                            inputs=inputs,
-                            filters=num_filters,
-                            kernel_size=[3, 3],
-                            padding='SAME',
-                            activation=None
-                            )
+                                   inputs=inputs,
+                                   filters=num_filters,
+                                   kernel_size=[3, 3],
+                                   padding='SAME',
+                                   activation=None
+                                   )
             out = batch_normalization_layer(out, num_filters, phase_train)
             out = tf.nn.relu(out)
         inputs = out
