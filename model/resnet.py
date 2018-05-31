@@ -26,7 +26,7 @@ def bottleneck(inputs, num_filters, strides, phase_train):
     else:
         # expand dimensions of channels
         inputs_expand = tf.layers.conv2d(inputs=inputs, filters=bn3.shape[3], kernel_size=[1, 1], padding='SAME', activation=None)
-        out = bn3 + inputs
+        out = bn3 + inputs_expand
     out = tf.nn.relu(out)
 
     return out
