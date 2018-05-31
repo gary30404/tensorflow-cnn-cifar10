@@ -96,7 +96,7 @@ def train():
                 bar_len = 29
                 filled_len = int((bar_len*int(percentage))/100)
                 bar = '=' * filled_len + '>' + '-' * (bar_len - filled_len)
-                msg = "Epoch: {:}/{:} - Step: {:>5} - [{}] {:.2f}% - Batch_Acc: {:.2f} - Loss: {:.4f} - {:} Sample/sec"
+                msg = "Epoch: {:}/{:} - Step: {:>5} - [{}] {:.2f}% - Batch Acc: {:.2f} - Loss: {:.4f} - {:} Sample/sec"
                 print(msg.format((e+1), EPOCH, step, bar, percentage, batch_acc, batch_loss, int(BATCH_SIZE/duration)))
 
         summary = tf.Summary(value=[

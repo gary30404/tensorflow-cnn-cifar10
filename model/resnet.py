@@ -40,6 +40,7 @@ def ResNet(x, image_size, image_channels, num_classes, phase_train, net):
     bn1 = batch_normalization_layer(conv1, 64, phase_train)
     out = tf.nn.relu(bn1)
 
+    print out.shape
     num_filters = 64
     stride = 1
     for num_blocks in n:
@@ -49,7 +50,7 @@ def ResNet(x, image_size, image_channels, num_classes, phase_train, net):
         stride = 2
         num_filters *= 2
 
-    out = tf.layers.average_pooling2d(out, pool_size=[4, 4], strides=1, padding='SAME')
+    out = tf.layers.average_pooling2d(out, pool_size=[4, 4], strides=1, padding='VALID')
 
     # flatten
     flat = tf.reshape(out, [-1, int(out.shape[1]*out.shape[2]*out.shape[3])])
