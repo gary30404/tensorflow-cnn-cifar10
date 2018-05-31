@@ -6,7 +6,7 @@ from data import *
 from model.vgg import VGG
 from model.googlenet import GoogLeNet
 from model.resnet import ResNet
-from sklearn.model_selection import KFold #cross validation
+#from sklearn.model_selection import KFold #cross validation
 
 IMAGE_SIZE = 32
 IMAGE_CHANNEL = 3
@@ -68,43 +68,46 @@ def train():
 
 
     global_val_acc = 0
-    for train_idx, val_idx in KFold(n_splits=SPLIT_SIZE).split(train_images, train_labels):
-        train_x = train_images[train_idx]
-        train_y = train_labels[train_idx]
-        val_x = train_images[val_idx]
-        val_y = train_labels[val_idx]
-        for e in range(EPOCH):
-            for batch_index in range(0, len(train_x), BATCH_SIZE):
-                if batch_index + BATCH_SIZE < len(train_x):
-                    data = train_x[batch_index:batch_index+BATCH_SIZE]
-                    label = train_y[batch_index:batch_index + BATCH_SIZE]
-                else:
-                    data = train_x[batch_index:len(train_images)]
-                    label = train_y[batch_index:len(train_labels)]
-                start_time = time.time()
-                step, _, batch_loss = sess.run(
-                                                          [global_step, optimizer, loss],
-                                                          feed_dict={x: data, y: label, phase_train: True}
-                                                          )
-                end_time = time.time()
-                duration = end_time - start_time
-                # progress bar
-                if batch_index % 20 == 0:
-                    percentage = float(batch_index+BATCH_SIZE+e*len(train_x))/float(len(train_x)*EPOCH)*100.
-                    bar_len = 29
-                    filled_len = int((bar_len*int(percentage))/100)
-                    bar = '=' * filled_len + '>' + '-' * (bar_len - filled_len)
-                    msg = "Epoch: {:}/{:} - Step: {:>5} - [{}] {:.2f}% - Loss: {:.4f} - {:} Sample/sec"
-                    print(msg.format((e+1), EPOCH, step, bar, percentage, batch_loss, int(BATCH_SIZE/duration)))
+    train_x = train_images
+    train_y = train_labels
+    #for train_idx, val_idx in KFold(n_splits=SPLIT_SIZE).split(train_images, train_labels):
+    #    train_x = train_images[train_idx]
+    #    train_y = train_labels[train_idx]
+    #    val_x = train_images[val_idx]
+    #    val_y = train_labels[val_idx]
+    for e in range(EPOCH):
+        for batch_index in range(0, len(train_x), BATCH_SIZE):
+            if batch_index + BATCH_SIZE < len(train_x):
+                data = train_x[batch_index:batch_index+BATCH_SIZE]
+                label = train_y[batch_index:batch_index + BATCH_SIZE]
+            else:
+                data = train_x[batch_index:len(train_images)]
+                label = train_y[batch_index:len(train_labels)]
+            start_time = time.time()
+            step, _, batch_loss, batch_acc = sess.run(
+                                                      [global_step, optimizer, loss, accuracy],
+                                                      feed_dict={x: data, y: label, phase_train: True}
+                                                      )
+            end_time = time.time()
+            duration = end_time - start_time
+            # progress bar
+            if batch_index % 20 == 0:
+                percentage = float(batch_index+BATCH_SIZE+e*len(train_x))/float(len(train_x)*EPOCH)*100.
+                bar_len = 29
+                filled_len = int((bar_len*int(percentage))/100)
+                bar = '=' * filled_len + '>' + '-' * (bar_len - filled_len)
+                msg = "Epoch: {:}/{:} - Step: {:>5} - [{}] {:.2f}% - Batch_Acc: {:.2f} - Loss: {:.4f} - {:} Sample/sec"
+                print(msg.format((e+1), EPOCH, step, bar, percentage, batch_acc, batch_loss, int(BATCH_SIZE/duration)))
 
-            summary = tf.Summary(value=[
-                                        tf.Summary.Value(tag='Epoch', simple_value=e),
-                                        tf.Summary.Value(tag='Loss', simple_value=batch_loss)
-                                        ]
-                                )
-            train_writer.add_summary(summary, step)
+        summary = tf.Summary(value=[
+                                    tf.Summary.Value(tag='Epoch', simple_value=e),
+                                    tf.Summary.Value(tag='Loss', simple_value=batch_loss)
+                                    ]
+                            )
+        train_writer.add_summary(summary, step)
 
             # validation
+            '''
             predicted_matrix = np.zeros(shape=len(val_x), dtype=np.int)
             for batch_index in range(0, len(val_x), BATCH_SIZE):
                 if batch_index + BATCH_SIZE < len(val_x):
@@ -126,6 +129,7 @@ def train():
                 global_test_acc = acc
                 print("\nReach a better validation accuracy at epoch: {:} with {:.2f}%".format(e, acc))
                 print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt\n')
+            '''
     train_writer.close()
 
     # test section
