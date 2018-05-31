@@ -41,6 +41,12 @@ def train():
         loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=outputs, labels=y))
     tf.summary.scalar('loss', loss)
 
+    with tf.name_scope('accuracy'):
+        predict = tf.argmax(outputs, axis=1)
+        acc = tf.equal(predict, tf.argmax(y, axis=1))
+        accuracy = tf.reduce_mean(tf.cast(acc, tf.float32))
+    tf.summary.scalar('accuracy', accuracy)
+
     with tf.name_scope('train'):
         optimizer = tf.train.MomentumOptimizer(learning_rate=args.lr, momentum=0.9).minimize(loss, global_step=global_step)
 
@@ -119,7 +125,7 @@ def train():
                 saver.save(sess, SAVE_PATH+str(e)+'_'+str(args.lr)+'_acc:'+str(acc)+'.ckpt')
                 global_test_acc = acc
                 print("\nReach a better validation accuracy at epoch: {:} with {:.2f}%".format(e, acc))
-                print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt')
+                print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt\n')
     train_writer.close()
 
     # test section
