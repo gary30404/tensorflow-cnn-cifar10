@@ -35,7 +35,7 @@ def NiN(x, image_size, image_channels, num_classes, phase_train, net):
     mlp3_1 = mlp(out3, 192, phase_train)
     mlp3_2 = mlp(mlp3_1, 10, phase_train)
 
-    out = tf.layers.average_pooling2d(mlp3_2, pool_size=[2, 2], strides=2, padding='SAME')
+    out = tf.layers.average_pooling2d(mlp3_2, pool_size=[2, 2], strides=2, padding='VALID')
     flat = tf.reshape(out, [-1, int(out.shape[1]*out.shape[2]*out.shape[3])])
     outputs = tf.layers.dense(inputs=flat, units=num_classes, activation=tf.nn.softmax)
 

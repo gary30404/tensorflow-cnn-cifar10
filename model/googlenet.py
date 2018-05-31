@@ -115,7 +115,7 @@ def GoogLeNet(x, image_size, image_channels, num_classes, phase_train, net):
         inception9 = inception(inception8, 384, 192, 384, 48, 128, 128, phase_train)
 
     with tf.name_scope('avg_pooling'):
-        out = tf.layers.average_pooling2d(inception9, pool_size=[8, 8], strides=1, padding='SAME')
+        out = tf.layers.average_pooling2d(inception9, pool_size=[8, 8], strides=1, padding='VALID')
 
     # flatten
     with tf.name_scope('fc'):

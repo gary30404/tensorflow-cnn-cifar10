@@ -24,7 +24,7 @@ def MobileNet(x, image_size, image_channels, num_classes, phase_train, net):
         num_filters = layers[0]
         strides = layers[1]
         out = bottleneck(out, num_filters, strides, phase_train)
-    out = tf.layers.average_pooling2d(out, pool_size=[2, 2], strides=1, padding='SAME')
+    out = tf.layers.average_pooling2d(out, pool_size=[2, 2], strides=1, padding='VALID')
     flat = tf.reshape(out, [-1, int(out.shape[1]*out.shape[2]*out.shape[3])])
     outputs = tf.layers.dense(inputs=flat, units=num_classes, activation=tf.nn.softmax)
     return outputs
