@@ -22,6 +22,11 @@ def train():
     train_images, train_labels = get_train_batch()
     test_images, test_labels = get_test_batch()
 
+    '''
+    images, labels = augment(images, labels,
+                         horizontal_flip=True, rotate=15, crop_probability=0.8, mixup=4)
+    '''
+    
     # model
     sess = tf.InteractiveSession()
 
@@ -124,8 +129,8 @@ def train():
             if acc > global_val_acc:
                 saver.save(sess, SAVE_PATH+str(e)+'_'+str(args.lr)+'_acc:'+str(acc)+'.ckpt')
                 global_test_acc = acc
-                print("\nReach a better validation accuracy at epoch: {:} with {:.2f}%".format(e, acc))
-                print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt\n')
+                print("\nReach a better validation accuracy at epoch: {:} with {:.2f}%".format(e+1, acc))
+                print("Saving at ... %s" % SAVE_PATH+str(e+1)+'_'+str(args.lr)+'_acc:'+str(acc)+'.ckpt\n')
     
     train_writer.close()
     
@@ -146,10 +151,10 @@ def train():
     mes = "\nTest Accuracy: {:.2f}% ({}/{})"
     print(mes.format(acc, correct_numbers, len(test_labels)))
 
-    saver.save(sess, SAVE_PATH+str(e)+'_'+str(args.lr)+'_acc:'+str(acc)+'.ckpt')
+    saver.save(sess, SAVE_PATH+'test'+'_acc:'+str(acc)+'.ckpt')
     global_test_acc = acc
     print("\nReach a better testing accuracy at epoch: {:} with {:.2f}%".format(e, acc))
-    print("Saving at ... %s" % SAVE_PATH+str(EPOCH)+'_'+str(args.lr)+'.ckpt') 
+    print("Saving at ... %s" % SAVE_PATH+'test'+'_acc:'+str(acc)+'.ckpt') 
     sess.close()   
 
 def main():
