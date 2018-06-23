@@ -31,9 +31,9 @@ def bottleneck(inputs, num_filters, strides, phase_train):
 
     return out
 
-def ResNet(x, image_size, image_channels, num_classes, phase_train, net):
-    x_image = tf.reshape(x, [-1, image_size, image_size, image_channels])
-    inputs = x_image
+def ResNet(x, num_classes, phase_train, net):
+    #x_image = tf.reshape(x, [-1, image_size, image_size, image_channels])
+    inputs = x
     n = nets[net]
 
     conv1 = tf.layers.conv2d(inputs=inputs, filters=64, kernel_size=[3, 3], strides=1, padding='SAME')

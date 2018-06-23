@@ -22,10 +22,12 @@ def train():
     train_images, train_labels = get_train_batch()
     test_images, test_labels = get_test_batch()
 
-    '''
-    images, labels = augment(images, labels,
-                         horizontal_flip=True, rotate=15, crop_probability=0.8, mixup=4)
-    '''
+    # reshape
+    train_images = tf.reshape(train_images, [-1, IMAGE_SIZE, IMAGE_SIZE, IMAGE_CHANNEL])
+    test_images = tf.reshape(test_images, [-1, IMAGE_SIZE, IMAGE_SIZE, IMAGE_CHANNEL])
+
+    train_images, train_labels = augment(train_images, train_labels, horizontal_flip=True, rotate=15, crop_probability=0.8, mixup=4)
+    
     
     # model
     sess = tf.InteractiveSession()
@@ -34,12 +36,12 @@ def train():
     phase_train = tf.placeholder(tf.bool, name='phase_train')
     global_step = tf.Variable(initial_value=0, trainable=False, name='global_step')
     with tf.name_scope('input'):
-        x = tf.placeholder(tf.float32, shape=[None, train_images.shape[1]], name='x_input')
+        x = tf.placeholder(tf.float32, shape=[None, IMAGE_SIZE, IMAGE_SIZE, IMAGE_CHANNEL], name='x_input')
         y = tf.placeholder(tf.float32, shape=[None, train_labels.shape[1]], name='y_input')
 
     # network
     #outputs = GoogLeNet(x, IMAGE_SIZE, IMAGE_CHANNEL, NUM_CLASSES, phase_train, '')
-    outputs = ResNet(x, IMAGE_SIZE, IMAGE_CHANNEL, NUM_CLASSES, phase_train, 'res50')
+    outputs = ResNet(x, NUM_CLASSES, phase_train, 'res50')
 
     var = tf.trainable_variables() 
     loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=outputs, labels=y))

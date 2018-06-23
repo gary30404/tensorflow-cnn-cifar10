@@ -5,6 +5,7 @@ from urllib import urlretrieve
 import tarfile
 import sys
 import time
+from augment import augment
 
 DATASET_DIRECTORY = './dataset/'
 CIFAR10_DIRECTORY = 'cifar-10-batches-py/'

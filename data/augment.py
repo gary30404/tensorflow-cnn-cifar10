@@ -1,5 +1,6 @@
 # https://gist.github.com/vertix/d2b1256003e9ffca8e7fc36ba1ba4eb3#file-tf_data_augmentation_on_gpu-py
 import tensorflow as tf
+import math
 
 def augment(images, labels,
             resize=None, # (width, height) tuple or None
@@ -14,11 +15,11 @@ def augment(images, labels,
     images = tf.image.resize_bilinear(images, resize)
   
   # My experiments showed that casting on GPU improves training performance
-  if images.dtype != tf.float32:
-    images = tf.image.convert_image_dtype(images, dtype=tf.float32)
-    images = tf.subtract(images, 0.5)
-    images = tf.multiply(images, 2.0)
+  images = tf.image.convert_image_dtype(images, dtype=tf.float32)
+  images = tf.subtract(images, 0.5)
+  images = tf.multiply(images, 2.0)
   labels = tf.to_float(labels)
+  
 
   with tf.name_scope('augmentation'):
     shp = tf.shape(images)
